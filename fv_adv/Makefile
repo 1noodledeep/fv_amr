@@ -4,7 +4,7 @@ iflags=-I.
 lflags=-L.
 # define the object files
 objs=field.o setup.o advance.o
-execs=solve test
+execs=solve
 
 all:
 	$(MAKE) executables
