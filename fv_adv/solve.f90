@@ -1,10 +1,10 @@
 program solve
 	use field
 	implicit none
-	real				:: T, dt, time=0.
+	real				:: T, dt, last_dt, time=0.
 	real, allocatable	:: output(:,:)
 	character(len=1024) :: filename, fmt_str
-	integer				:: i, j, nt, frames, incr, last_incr, co
+	integer				:: i, j, s, nt, frames, incr, last_incr, co
 	! Set up the solution array and the problem parameters
 	call coarse_setup
 
@@ -14,6 +14,8 @@ program solve
 	read (*, *) dt
 	write(*, '(a)', advance="no") "Number of frames to write: "
 	read (*, *) frames
+
+	s = 0
 	! Write at least the beginning and the end frame
 	if (frames < 2) then
 		frames =2
@@ -21,21 +23,17 @@ program solve
 
 	! Compute the number of timesteps to take
 	if(dt> max_dt) dt = max_dt
-	nt = int(T/dt) + 1
-	if(mod(nt, 2)==1) nt = nt+1
+	nt = int(T/dt)
+	last_dt = (T-nt*dt)
 
 	! get the number of timesteps per output frame
 	! last frame might have more steps
 	incr = int(nt/ (frames-1))
-	if (mod(incr, 2) == 1) then
-		incr = incr-1
-	endif
 
 	if(incr * (frames-1) < nt) then
-		last_incr = nt - incr * (frames-1)
-		if(mod(last_incr, 2)==1) then
-			last_incr = last_incr +1
-		endif
+		last_incr = incr + nt - incr * (frames-1)
+	else
+		last_incr =  incr
 	end if
 
 	! Initialize the solution
@@ -59,6 +57,7 @@ program solve
 	write(7, *) "# Total time = ", T
 	write(7, *) "# Frames to write = ", frames
 	write(7, *) "# dt = ", dt
+	write(7,*)  "# last dt = ", last_dt
 	write(7, *) "# Number of steps per frame = ", incr, "(", last_incr, ")"
 	write(7, *) "# Current time = ", time
 	write(7, *) "# ================================================"
@@ -71,27 +70,31 @@ program solve
 
 	write(7, '(a)', advance = "no") " #   x   "
 	! step forward
+	write(7, '(f8.5 x)', advance="no") time
 	do j = 1, frames-1
-		write(7, '(f8.5 x)', advance="no") time
 
 		if (j<frames-1) then
-			co = int(incr/2)
+			co = incr
 		else
-			co = int(last_incr/2)
+			co = last_incr
 		end if
 
 		do i=1, co
-			call step_forward(dt, time)
+			call step_forward(dt, time, s)
 		end do
 
+		if (j==frames-1) then
+			call step_forward(last_dt, time, s)
+		end if
 		do i=lo, hi
-			output(i, j) =  soln(i, 0)
+			output(i, j) =  soln(i, s)
 		end do
+		write(7, '(f8.5 x)', advance="no") time
 		
 	end do
+	write(7,*)
 
 	! print out the results
-	write(7,'(f8.5)') time
 	do i = lo, hi
 		write(7, '(f8.5 x)', advance="no") dx*(i+0.5)
 		do j = 0, frames-1
