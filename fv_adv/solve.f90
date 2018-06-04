@@ -4,9 +4,9 @@ program solve
 	real				:: T, dt, last_dt, time=0.
 	real, allocatable	:: output(:,:)
 	character(len=1024) :: filename, fmt_str
-	integer				:: i, j, s, nt, frames, incr, last_incr, co
+	integer				:: i, j, s, nt, frames, incr, last_incr, co, ilo, ihi
 	! Set up the solution array and the problem parameters
-	call coarse_setup
+	call setup
 
 	write (*,'(a)', advance="no") "Minimal duration to solve to: "
 	read (*, *) T
@@ -38,6 +38,8 @@ program solve
 
 	! Initialize the solution
 	call initialize
+	ilo = int(0.25*n)
+	ihi = int(0.75*n)
 
 	! Store the initial snap shot
 	allocate(output(lo:hi, 0:frames-1))

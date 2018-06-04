@@ -7,8 +7,9 @@ module field
 	implicit none
 	! length of the array
 	integer				:: n, n2
-	! starting and ending index of the array
-	integer				:: lo, hi
+	! starting and ending index of
+	! the coarse and fine array
+	integer				:: lo, hi, flo, fhi
 	! the first and last non-ghost node index
 	integer				:: pl, pr
 	! physical coordinates of lower and higher bounds
@@ -17,5 +18,6 @@ module field
 	real, parameter		:: riemann_boundary = 0.1
 	! the soln array
 	real, allocatable	:: soln(:, :)
+	! the refined solution array
+	real, allocatable	:: fine_soln(:,:)
 end module field
-
