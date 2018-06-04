@@ -3,7 +3,7 @@ cflags=
 iflags=-I.
 lflags=-L.
 # define the object files
-objs=field.o setup.o advance.o refine.o
+objs=field.o setup.o advance.o
 execs=solve
 
 all:
