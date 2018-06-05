@@ -17,12 +17,10 @@ subroutine step_forward (dt, time, s)
 	left_out = 0
 	w = xor(s,1)
 
-	call fill_ghost_cells(s)
 	! Update the coarse level cell averages using
 	! one sided upwind method
 	do j=pl, pr
 		soln(j, w) =cfl*soln(j-1, s) + (1-cfl)*soln(j, s)
-
 	end do
 	! Refinement: fill ghost cell and update fine level
 	! Then average the fine level values onto coarse level
@@ -33,43 +31,6 @@ subroutine step_forward (dt, time, s)
 
 	s = w
 end subroutine step_forward
-
-subroutine fill_ghost_cells (s)
-!-------------------------------------------------
-! Fill the ghost cells on either end
-!-------------------------------------------------
-	use field
-	implicit none
-	integer, intent(in) :: s
-
-	! fill the ghost nodes to enforce bc
-	! Dirichlet on the left,
-	! value = riemann problem amplitude
-	! Homogeneous Neumann on the right
-	soln(lo, s) = riemann_val
-	soln(hi, s) = soln(hi-1, s)
-end subroutine fill_ghost_cells
-
-subroutine fill_fine_ghosts (s, ts)
-!-------------------------------------------------
-! Fill the ghost cells on the fine grid
-!-------------------------------------------------
-	use field
-	implicit none
-	integer, intent(in)	:: s, ts
-
-	! Even though we only need the left edge
-	! We fill both ends anyway
-	! In between two fine steps, we use
-	! average of the coarse grid solution
-	if(ts == 0) then
-		fine_soln(2*flo-1, s) = soln(flo-1, s)
-		fine_soln(2*fhi+2, s) = soln(fhi+1, s)
-	else
-		fine_soln(2*flo-1, s) = 0.5*(soln(flo-1,0) + soln(flo-1,1))
-		fine_soln(2*fhi+2, s) = 0.5*(soln(fhi+1, 0) + soln(fhi+1, 1))
-	end if
-end subroutine fill_fine_ghosts
 
 subroutine fine_step (dt, s, left_out, right_in)
 !-------------------------------------------------
@@ -129,3 +90,24 @@ subroutine fine_step (dt, s, left_out, right_in)
 		soln(i, w) = 0.5*(fine_soln(2*i, w) + fine_soln(2*i+1, w))
 	end do
 end subroutine fine_step
+
+subroutine fill_fine_ghosts (s, ts)
+!-------------------------------------------------
+! Fill the ghost cells on the fine grid
+!-------------------------------------------------
+	use field
+	implicit none
+	integer, intent(in)	:: s, ts
+
+	! Even though we only need the left edge
+	! We fill both ends anyway
+	! In between two fine steps, we use
+	! average of the coarse grid solution
+	if(ts == 0) then
+		fine_soln(2*flo-1, s) = soln(flo-1, s)
+		fine_soln(2*fhi+2, s) = soln(fhi+1, s)
+	else
+		fine_soln(2*flo-1, s) = 0.5*(soln(flo-1,0) + soln(flo-1,1))
+		fine_soln(2*fhi+2, s) = 0.5*(soln(fhi+1, 0) + soln(fhi+1, 1))
+	end if
+end subroutine fill_fine_ghosts

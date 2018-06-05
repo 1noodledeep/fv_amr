@@ -4,9 +4,12 @@ program solve
 	real				:: T, dt, last_dt, time=0.
 	real, allocatable	:: output(:,:)
 	character(len=1024) :: filename, fmt_str
-	integer				:: i, j, s, nt, frames, incr, last_incr, co, ilo, ihi
+	integer				:: i, j, s=0, nt, frames, incr, last_incr, co
 	! Set up the solution array and the problem parameters
 	call setup
+
+	! Initialize the solution
+	call initialize
 
 	write (*,'(a)', advance="no") "Minimal duration to solve to: "
 	read (*, *) T
@@ -15,19 +18,18 @@ program solve
 	write(*, '(a)', advance="no") "Number of frames to write: "
 	read (*, *) frames
 
-	!T = 7
-	!dt = 1
-	!frames=11
-	s = 0
-	! Write at least the beginning and the end frame
-	if (frames < 2) then
-		frames =2
-	end if
-
 	! Compute the number of timesteps to take
 	if(dt> max_dt) dt = max_dt
 	nt = int(T/dt)
 	last_dt = (T-nt*dt)
+
+	! Write at least the beginning and the end frame
+	! At most 1 frame/timestep
+	if (frames < 2) then
+		frames =2
+	else if (frames > nt+1) then
+		frames = nt +1
+	end if
 
 	! get the number of timesteps per output frame
 	! last frame might have more steps
@@ -38,11 +40,6 @@ program solve
 	else
 		last_incr =  incr
 	end if
-
-	! Initialize the solution
-	call initialize
-	ilo = int(0.25*n)
-	ihi = int(0.75*n)
 
 	! Store the initial snap shot
 	allocate(output(lo:hi, 0:frames-1))

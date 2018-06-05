@@ -31,15 +31,19 @@ subroutine setup
 	if (a_stat/=0) stop "setup: allocation of coarse foln failed. "
 
 	! Allocate the refined region solution
-	flo = pl + int(n*0.40)
-	fhi = pl + int(n*0.60)
+	flo = pl + int(n*0.00)
+	fhi = pl + int(n*1.00)
 
 	if(fhi>pr) then
 		fhi = pr
 	end if
 
+	if(flo < pl) then
+		flo = pl
+	end if
+
 	! Pad each side with 1 ghost cell
-	allocate(fine_soln(2*flo-1:2*fhi+2, 0:1), stat=a_stat)
+	allocate(fine_soln(2*flo-ngc:2*fhi+1+ngc, 0:1), stat=a_stat)
 	if(a_stat/=0) stop "setup: allocation of fine soln failed. "
 
 end subroutine setup
@@ -88,4 +92,24 @@ subroutine initialize
 			fine_soln(i,0) = 0
 		end if
 	end do
+
+	call fill_ghost_cells(0)
+	call fill_ghost_cells(1)
 end subroutine initialize
+
+subroutine fill_ghost_cells (s)
+!-------------------------------------------------
+! Fill the ghost cells on either end
+!-------------------------------------------------
+	use field
+	implicit none
+	integer, intent(in) :: s
+
+	! fill the ghost nodes to enforce bc
+	! Dirichlet on the left,
+	! value = riemann problem amplitude
+	! Homogeneous Neumann on the right
+	soln(lo, s) = riemann_val
+	soln(hi, s) = soln(hi-1, s)
+end subroutine fill_ghost_cells
+
