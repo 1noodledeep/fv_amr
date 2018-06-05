@@ -13,6 +13,17 @@ The code is primarily written in Fortran 90, source code assume free form.
 - GNUPLOT (visualization)
 
 ## Solve
+To change some system parameters, edit field.f90.
+Parameters that can be changed:
+
+- Initial condition
+
+- CFL number
+
+- Constant velocity u (u>0)
+
+- Physical coordinates
+
 To run the code, cd into fv_adv/ and do
 
 > make
