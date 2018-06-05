@@ -15,6 +15,9 @@ program solve
 	write(*, '(a)', advance="no") "Number of frames to write: "
 	read (*, *) frames
 
+	!T = 7
+	!dt = 1
+	!frames=11
 	s = 0
 	! Write at least the beginning and the end frame
 	if (frames < 2) then

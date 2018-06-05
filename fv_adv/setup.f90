@@ -12,7 +12,7 @@ subroutine setup
 	integer, parameter :: ngc=1
 	write(*,'(A)',advance="NO") "The number of valid cells to use : "
 	read(*, *) n
-
+	!n = 200
 	! add ghost cells
 	n2 = n+2
 	! figure out the indexing scheme, going from -1 to n
@@ -24,16 +24,15 @@ subroutine setup
 	pl = lo+ngc
 	pr = hi-ngc
 
-	u = 0.1
 	dx = (rhi-rlo) / real(n)
-	max_dt = 0.5* dx / u
+	max_dt = cfl* dx / u
 
 	allocate(soln(lo:hi, 0:1), stat=a_stat)
 	if (a_stat/=0) stop "setup: allocation of coarse foln failed. "
 
 	! Allocate the refined region solution
-	flo = pl + int(n*0.1)
-	fhi = pl + int(n*1)
+	flo = pl + int(n*0.01)
+	fhi = pl + int(n*0.95)
 
 	if(fhi>pr) then
 		fhi = pr
