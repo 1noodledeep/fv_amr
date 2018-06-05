@@ -31,8 +31,8 @@ subroutine setup
 	if (a_stat/=0) stop "setup: allocation of coarse foln failed. "
 
 	! Allocate the refined region solution
-	flo = pl + int(n*0.01)
-	fhi = pl + int(n*0.95)
+	flo = pl + int(n*0.40)
+	fhi = pl + int(n*0.60)
 
 	if(fhi>pr) then
 		fhi = pr

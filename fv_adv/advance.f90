@@ -20,12 +20,8 @@ subroutine step_forward (dt, time, s)
 	call fill_ghost_cells(s)
 	! Update the coarse level cell averages using
 	! one sided upwind method
-	!!! write(*,*) "Time: ", time
 	do j=pl, pr
 		soln(j, w) =cfl*soln(j-1, s) + (1-cfl)*soln(j, s)
-	!!!	write(*,*) j, &
-	!!!			"coarse", soln(j-1,s), soln(j, s), &
-	!!!			"updated", soln(j,w)
 
 	end do
 	! Refinement: fill ghost cell and update fine level
@@ -36,7 +32,6 @@ subroutine step_forward (dt, time, s)
 	soln(fhi+1, w) = soln(fhi+1, w) + cfl*(-soln(fhi, s) + right_in)
 
 	s = w
-
 end subroutine step_forward
 
 subroutine fill_ghost_cells (s)
@@ -55,17 +50,25 @@ subroutine fill_ghost_cells (s)
 	soln(hi, s) = soln(hi-1, s)
 end subroutine fill_ghost_cells
 
-subroutine fill_fine_ghosts (s)
+subroutine fill_fine_ghosts (s, ts)
 !-------------------------------------------------
 ! Fill the ghost cells on the fine grid
 !-------------------------------------------------
 	use field
 	implicit none
-	integer, intent(in)	:: s
+	integer, intent(in)	:: s, ts
 
-	! Even though we only need 
-	fine_soln(2*flo-1, s) = soln(flo-1, s)
-	fine_soln(2*fhi+2, s) = soln(fhi+1, s)
+	! Even though we only need the left edge
+	! We fill both ends anyway
+	! In between two fine steps, we use
+	! average of the coarse grid solution
+	if(ts == 0) then
+		fine_soln(2*flo-1, s) = soln(flo-1, s)
+		fine_soln(2*fhi+2, s) = soln(fhi+1, s)
+	else
+		fine_soln(2*flo-1, s) = 0.5*(soln(flo-1,0) + soln(flo-1,1))
+		fine_soln(2*fhi+2, s) = 0.5*(soln(fhi+1, 0) + soln(fhi+1, 1))
+	end if
 end subroutine fill_fine_ghosts
 
 subroutine fine_step (dt, s, left_out, right_in)
@@ -87,46 +90,42 @@ subroutine fine_step (dt, s, left_out, right_in)
 	! Keeping cfl number constant, we need to sub cycle
 	! assume dt_fine=0.5*dt_coarse
 	w = xor(s,1)
-	call fill_fine_ghosts(s)
-	call fill_fine_ghosts(w)
 
-	! Now take a step forward on the fine grid
+	! Fill the current fine solution with coarse soln
+	! at t_n
+	call fill_fine_ghosts(s, 0)
+
+	! Fill the next fine solution step with average
+	! between t_n and t_{n+1} on coarse grid
+	call fill_fine_ghosts(w, 1)
+
+	! Now take 1 half step forward on the fine grid
 	do i = 2*flo, 2*fhi+1
 		fine_soln(i,w) = cfl*fine_soln(i-1, s)&
 						+ (1-cfl)*fine_soln(i,s)
 	end do
 
+	! Since we use upwinding scheme and assume u>0
+	! The flux is the upwind cell average
+	! We also must capture the flux before the array gets
+	! reused by second half step update
+	left_out = 0.5*(fine_soln(2*flo-1, s) + fine_soln(2*flo-1, w))
+	right_in = 0.5*(fine_soln(2*fhi+1, s) + fine_soln(2*fhi+1, w))
+
+	! Now take second half step forward
 	do i = 2*flo, 2*fhi+1
 		fine_soln(i,s) = cfl*fine_soln(i-1, w)&
 						+ (1-cfl)*fine_soln(i,w)
 	end do
+
 
 	! Transfer the solution over to the correct array
 	do i = 2*flo, 2*fhi+1
 		fine_soln(i,w) = fine_soln(i,s)
 	end do
 
+	! Average solution onto coarse grid
 	do i = flo, fhi
-		!!!write(*,*) i, "fine ", fine_soln(2*i, w), fine_soln(2*i+1, w),&
-		!!!	"coarse", soln(i, w), 0.5*(fine_soln(2*i, w) + fine_soln(2*i+1, w))
 		soln(i, w) = 0.5*(fine_soln(2*i, w) + fine_soln(2*i+1, w))
 	end do
-
-
-	! Since we use upwinding scheme and assume u>0
-	! The flux is the upwind cell average
-	left_out = fine_soln(2*flo-1, s)
-	right_in = fine_soln(2*fhi+1, s)
-
 end subroutine fine_step
-
-subroutine interpolate (more, less, val)
-!-------------------------------------------------
-! Linear interpolation, assume interpolation
-! point is half at 1/4 or 3/4 between two coarser
-! points
-!-------------------------------------------------
-	real, intent(in)	:: more,less
-	real, intent(out)	:: val
-	val = 0.25*less + 0.75*more
-end subroutine interpolate

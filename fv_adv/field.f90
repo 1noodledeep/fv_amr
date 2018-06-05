@@ -16,7 +16,7 @@ module field
 	real				:: rlo=0., rhi=1., dx, max_dt
 	real, parameter		:: riemann_val = 1.
 	real, parameter		:: riemann_boundary = 0.1
-	real, parameter		:: cfl=0.5
+	real, parameter		:: cfl=0.7
 	real, parameter		:: u=0.1
 	! the soln array
 	real, allocatable	:: soln(:, :)
