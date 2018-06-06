@@ -1,5 +1,10 @@
 # fv_amr
-A small code base to solve 1D advection equation with constant velocity (flow left to right).
+A small code base to solve simple 1D PDEs.
+
+In fv_adv, we have a 1D advection equation, with constant velocity (flow left to right).
+
+In fv_diff, we have a 1D diffusion equation, with uniform diffusion constant.
+
 We use finite volume method, and an implementation of mesh refinement in a fixed region.
 The code is primarily written in Fortran 90, source code assume free form.
 
