@@ -24,7 +24,7 @@ subroutine setup
 	pl = lo+ngc
 	pr = hi-ngc
 
-	dx = (rhi-rlo) / real(n)
+	dx = (rhi-rlo) / dble(n)
 	max_dt = cfl* dx / u
 
 	allocate(soln(lo:hi, 0:1), stat=a_stat)
@@ -70,11 +70,11 @@ subroutine initialize
 !-------------------------------------------------
 	use field
 	implicit none
-	real 			 	:: x
+	real(dp) 		 	:: x
 	integer 		 	:: i
 
 	do i = lo,hi
-		x = dx*(real(i)+0.5)
+		x = dx*(dble(i)+0.5)
 		soln(i, 1)=0
 		if (x<riemann_boundary) then
 			soln(i, 0) = riemann_val
@@ -84,7 +84,7 @@ subroutine initialize
 	end do
 
 	do i = 2*flo-1, 2*fhi+2
-		x = 0.5*dx*(real(i)+0.5)
+		x = 0.5*dx*(dble(i)+0.5)
 		fine_soln(i,1)=0
 		if(x<riemann_boundary) then
 			fine_soln(i,0) = riemann_val

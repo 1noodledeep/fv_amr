@@ -5,12 +5,12 @@ subroutine step_forward (dt, time, s)
 !-------------------------------------------------
 	use field
 	implicit none
-	real, intent(in)		:: dt
-	real, intent(inout)		:: time
-	integer, intent (inout)	:: s
+	real(dp), intent(in)		:: dt
+	real(dp), intent(inout)		:: time
+	integer, intent (inout)		:: s
 	! local varaibles
-	real 					:: left_out, right_in
-	integer					:: i, j, w
+	real(dp) 					:: left_out, right_in
+	integer						:: i, j, w
 
 	time = time+dt
 	right_in = 0
@@ -43,11 +43,11 @@ subroutine fine_step (dt, s, left_out, right_in)
 !-------------------------------------------------
 	use field
 	implicit none
-	real, intent(in)		:: dt
-	integer, intent(in)		:: s
-	real, intent(out)		:: left_out, right_in
+	real(dp), intent(in)		:: dt
+	integer, intent(in)			:: s
+	real(dp), intent(out)		:: left_out, right_in
 	! local variables
-	integer					:: i,w
+	integer						:: i,w
 
 	! Keeping cfl number constant, we need to sub cycle
 	! assume dt_fine=0.5*dt_coarse

@@ -1,8 +1,8 @@
 program solve
 	use field
 	implicit none
-	real				:: T, dt, last_dt, time=0.
-	real, allocatable	:: output(:,:)
+	real(dp)				:: T, dt, last_dt, time=0.
+	real(dp), allocatable	:: output(:,:)
 	character(len=1024) :: filename, fmt_str
 	integer				:: i, j, s=0, nt, frames, incr, last_incr, co
 	! Set up the solution array and the problem parameters

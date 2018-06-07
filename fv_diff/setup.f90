@@ -12,7 +12,7 @@ subroutine setup
 	integer, parameter :: ngc=1
 	write(*,'(A)',advance="NO") "The number of valid cells to use : "
 	read(*, *) n
-	!n = 200
+	!n = 100
 	! add ghost cells
 	n2 = n+2
 	! figure out the indexing scheme, going from -1 to n
@@ -24,7 +24,7 @@ subroutine setup
 	pl = lo+ngc
 	pr = hi-ngc
 
-	dx = (rhi-rlo) / real(n)
+	dx = (rhi-rlo) / dble(n)
 	max_dt = cfl*dx*dx / D
 
 	allocate(soln(lo:hi, 0:1), stat=a_stat)

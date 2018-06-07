@@ -5,17 +5,18 @@ subroutine step_forward (dt, time, s)
 !-------------------------------------------------
 	use field
 	implicit none
-	real, intent(in)		:: dt
-	real, intent(inout)		:: time
-	integer, intent (inout)	:: s
+	real(dp), intent(in)		:: dt
+	real(dp), intent(inout)		:: time
+	integer, intent (inout)		:: s
 	! local varaibles
-	real 					:: left_out, right_in, old
-	integer					:: i, j, w
+	real(dp) 					:: left_out, right_in, old
+	integer						:: i, j, w
 
 	time = time+dt
 	right_in = 0
 	left_out = 0
 	w = xor(s,1)
+
 	! Since we have prd bc, we need to sync the
 	! boundary before each time step
 	call fill_ghost_cells(s)
@@ -23,20 +24,20 @@ subroutine step_forward (dt, time, s)
 	! Update the coarse level cell averages using
 	! 2nd order centered difference 2nd derivative
 	do j=pl, pr
-		soln(j, w) = (1. - 2*cfl) * soln(j, s)&
+		soln(j, w) = (1._dp - 2_dp*cfl) * soln(j, s)&
 					+ cfl*(soln(j+1, s)+soln(j-1,s))
 	end do
 
 	! Refinement: fill ghost cell and update fine level
 	! Then average the fine level values onto coarse level
-	!call fine_step(s, left_out, right_in)
+	call fine_step(s, left_out, right_in)
 
 	! Reflux: replace coarse flux with fine flux
 	! Remember flux is negative first derivative
-	!old = -(soln(flo,s)-soln(flo-1,s))
-	!soln(flo-1, w) = soln(flo-1,w) + cfl*(old - left_out)
-	!old = -(soln(fhi+1,s) - soln(fhi,s))
-	!soln(fhi+1, w) = soln(fhi+1,w) + cfl*(-old + right_in)
+	old = -(soln(flo,s)-soln(flo-1,s))
+	soln(flo-1, w) = soln(flo-1,w) + cfl*(old - left_out)
+	old = -(soln(fhi+1,s) - soln(fhi,s))
+	soln(fhi+1, w) = soln(fhi+1,w) + cfl*(-old + right_in)
 
 	s = w
 end subroutine step_forward
@@ -51,11 +52,11 @@ subroutine fine_step (s, left_out, right_in)
 !-------------------------------------------------
 	use field
 	implicit none
-	integer, intent(in)		:: s
-	real, intent(out)		:: left_out, right_in
-	real					:: fine_cfl
+	integer, intent(in)			:: s
+	real(dp), intent(out)		:: left_out, right_in
+	real(dp)					:: fine_cfl
 	! local variables
-	integer					:: i,w
+	integer						:: i,w
 
 	! Keeping cfl number constant, we need to sub cycle
 	! assume dt_fine=0.5*dt_coarse
@@ -63,15 +64,15 @@ subroutine fine_step (s, left_out, right_in)
 
 	! Fill the current fine solution with coarse soln
 	! at t_n
-	!call fill_fine_ghosts(s, 0)
+	call fill_fine_ghosts(s, 0)
 	!call lin_interpolate(s,0)
-	call quad_interpolate(s,0)
+	!call quad_interpolate(s,0)
 
 	! Fill the next fine solution step with average
 	! between t_n and t_{n+1} on coarse grid
-	!call fill_fine_ghosts(w, 1)
+	call fill_fine_ghosts(w, 1)
 	!call lin_interpolate(w,1)
-	call quad_interpolate(w,1)
+	!call quad_interpolate(w,1)
 
 	! Since the factor here is dt/dx**2
 	! dt and dx both decrease by a factor of 2
@@ -80,7 +81,7 @@ subroutine fine_step (s, left_out, right_in)
 
 	! Now take 1 half step forward on the fine grid
 	do i = 2*flo, 2*fhi+1
-		fine_soln(i,w) = (1. - 2*fine_cfl) * fine_soln(i, s) &
+		fine_soln(i,w) = (1._dp - 2*fine_cfl) * fine_soln(i, s) &
 					+ fine_cfl*(fine_soln(i+1, s)+fine_soln(i-1,s))
 	end do
 
@@ -108,7 +109,7 @@ subroutine fine_step (s, left_out, right_in)
 
 	! Average solution onto coarse grid
 	do i = flo, fhi
-		soln(i, w) = 0.5*(fine_soln(2*i, w) + fine_soln(2*i+1, w))
+		soln(i, w) = 0.5_dp*(fine_soln(2*i, w) + fine_soln(2*i+1, w))
 	end do
 end subroutine fine_step
 
@@ -130,8 +131,8 @@ subroutine fill_fine_ghosts (s, ts)
 		fine_soln(2*fhi+2, s) = soln(fhi+1, s)
 	! non-zero for in between time steps
 	else
-		fine_soln(2*flo-1, s) = 0.5*(soln(flo-1,0) + soln(flo-1,1))
-		fine_soln(2*fhi+2, s) = 0.5*(soln(fhi+1, 0) + soln(fhi+1, 1))
+		fine_soln(2*flo-1, s) = 0.5_dp*(soln(flo-1,0) + soln(flo-1,1))
+		fine_soln(2*fhi+2, s) = 0.5_dp*(soln(fhi+1, 0) + soln(fhi+1, 1))
 	end if
 end subroutine fill_fine_ghosts
 
@@ -146,14 +147,14 @@ subroutine lin_interpolate(s, ts)
 	
 	! 0 for beginning of t_n
 	if(ts == 0) then
-		fine_soln(2*flo-1, s) = 0.75*soln(flo-1, s)+0.25*soln(flo,s)
-		fine_soln(2*fhi+2, s) = 0.25*soln(fhi, s)+0.75*soln(fhi+1,s)
+		fine_soln(2*flo-1, s) = 0.75_dp*soln(flo-1, s)+0.25_dp*soln(flo,s)
+		fine_soln(2*fhi+2, s) = 0.25_dp*soln(fhi, s)+0.75_dp*soln(fhi+1,s)
 	! non-zero for in between time steps
 	else
-		fine_soln(2*flo-1, s) = 0.5*(0.75*soln(flo-1, 1)+0.25*soln(flo,1)&
-								+  0.75*soln(flo-1, 0)+0.25*soln(flo,0))
-		fine_soln(2*fhi+2, s) = 0.5*(0.25*soln(fhi, 1)+0.75*soln(fhi+1,1)&
-								+ 0.25*soln(fhi, 0)+0.75*soln(fhi+1,0))
+		fine_soln(2*flo-1, s) = 0.5_dp*(0.75_dp*soln(flo-1, 1)+0.25_dp*soln(flo,1)&
+								+  0.75_dp*soln(flo-1, 0)+0.25_dp*soln(flo,0))
+		fine_soln(2*fhi+2, s) = 0.5_dp*(0.25_dp*soln(fhi, 1)+0.75_dp*soln(fhi+1,1)&
+								+ 0.25_dp*soln(fhi, 0)+0.75_dp*soln(fhi+1,0))
 	end if
 
 end subroutine lin_interpolate
@@ -164,12 +165,12 @@ subroutine quad_interpolate(s, ts)
 !-------------------------------------------------
 	use field
 	implicit none
-	integer, intent(in) :: s, ts
-	real				:: alo,blo,clo,ahi,bhi,chi
-	real				:: sixteenth_dxsp, quarter_dxsp
+	integer, intent(in) 	:: s, ts
+	real(dp)				:: alo,blo,clo,ahi,bhi,chi
+	real(dp)				:: sixteenth_dxsp, quarter_dxsp
 
-	sixteenth_dxsp = 0.0625*dx*dx
-	quarter_dxsp = 0.25*dx
+	sixteenth_dxsp = 0.0625_dp*dx*dx
+	quarter_dxsp = 0.25_dp*dx
 	! 0 for beginning of t_n
 	if(ts == 0) then
 		call fit_quadratic( soln(fhi, s), soln(fhi+1, s), soln(fhi+2, s),&
@@ -185,7 +186,7 @@ subroutine quad_interpolate(s, ts)
 							alo, blo, clo)
 		call fit_quadratic( soln(flo-2, 1), soln(flo-1, 1), soln(flo, 1),&
 							ahi, bhi, chi)
-		fine_soln(2*flo-1, s) = 0.5*(alo*sixteenth_dxsp + blo*quarter_dxsp + clo&
+		fine_soln(2*flo-1, s) = 0.5_dp*(alo*sixteenth_dxsp + blo*quarter_dxsp + clo&
 								+  ahi*sixteenth_dxsp + bhi*quarter_dxsp +chi)
 
 		! Now average in time at the right edge
@@ -193,7 +194,7 @@ subroutine quad_interpolate(s, ts)
 							alo, blo, clo)
 		call fit_quadratic( soln(fhi, 1), soln(fhi+1, 1), soln(fhi+2, 1),&
 							ahi, bhi, chi)
-		fine_soln(2*fhi+2, s) = 0.5*(alo*sixteenth_dxsp - blo*quarter_dxsp + clo&
+		fine_soln(2*fhi+2, s) = 0.5_dp*(alo*sixteenth_dxsp - blo*quarter_dxsp + clo&
 								+ ahi*sixteenth_dxsp - bhi*quarter_dxsp +chi)
 	end if
 
@@ -208,12 +209,12 @@ subroutine fit_quadratic(left, cent, right, a, b, c)
 !-------------------------------------------------
 	use field
 	implicit none
-	real, intent(in)	:: left, cent, right
-	real, intent(out)	:: a, b, c
+	real(dp), intent(in)	:: left, cent, right
+	real(dp), intent(out)	:: a, b, c
 
 	c = cent
-	b = 0.5*(right-left)/dx
-	a = 0.5*(right+left - 2*cent)/dx/dx
+	b = 0.5_dp*(right-left)/dx
+	a = 0.5_dp*(right+left - 2*cent)/dx/dx
 
 end subroutine fit_quadratic
 
@@ -223,14 +224,18 @@ subroutine integrate_mass(s, m)
 !-------------------------------------------------
 	use field
 	implicit none
-	integer, intent(in)	:: s
-	real, intent(out)	:: m
-	integer				:: i
-	real				:: mass
+	integer, intent(in)				:: s
+	real(dp), intent(out)	:: m
+	integer							:: i
+	real(dp)				:: mass
 
 	mass = 0
+	call fill_ghost_cells(0)
+	call fill_ghost_cells(1)
+
 	do i = pl,pr
 		mass = mass+soln(i,s)
 	end do
+
 	m = mass*dx
 end subroutine integrate_mass

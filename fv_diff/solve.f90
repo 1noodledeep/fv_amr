@@ -1,10 +1,11 @@
 program solve
 	use field
 	implicit none
-	real				:: T, dt, last_dt, time=0.
-	real, allocatable	:: output(:,:), mass(:)
-	character(len=1024) :: filename, fmt_str
-	integer				:: i, j, s=0, nt, frames, incr, last_incr, co
+	real(dp)				:: T, dt, last_dt, time=0._dp
+	real(dp), allocatable	:: output(:,:), mass(:)
+	character(len=1024) 	:: filename, fmt_str
+	integer					:: i, j, s=0, nt, frames,&
+							   incr, last_incr, co
 	! Set up the solution array and the problem parameters
 	call setup
 
@@ -48,6 +49,7 @@ program solve
 		output(i, 0) = soln(i, 0)
 	end do
 	call integrate_mass(0, mass(0))
+	!write(*,*) time, mass(0)
 
 	! Initialize everything else in output to zero
 	do j=1, frames-1
@@ -95,6 +97,7 @@ program solve
 			output(i, j) =  soln(i, s)
 		end do
 		call integrate_mass(s, mass(j))
+		!write(*,*) time, mass(j)
 
 		write(7, '(f8.5 x)', advance="no") time
 		
