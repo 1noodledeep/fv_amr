@@ -64,15 +64,16 @@ subroutine fine_step (s, left_out, right_in)
 
 	! Fill the current fine solution with coarse soln
 	! at t_n
-	call fill_fine_ghosts(s, 0)
-	!call lin_interpolate(s,0)
-	!call quad_interpolate(s,0)
-
 	! Fill the next fine solution step with average
 	! between t_n and t_{n+1} on coarse grid
-	call fill_fine_ghosts(w, 1)
+	!call fill_fine_ghosts(s, 0)
+	!call fill_fine_ghosts(w, 1)
+
+	!call lin_interpolate(s,0)
 	!call lin_interpolate(w,1)
-	!call quad_interpolate(w,1)
+
+	call quad_interpolate(s,0)
+	call quad_interpolate(w,1)
 
 	! Since the factor here is dt/dx**2
 	! dt and dx both decrease by a factor of 2

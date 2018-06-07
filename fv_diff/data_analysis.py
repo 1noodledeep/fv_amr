@@ -18,8 +18,10 @@ def interpolate(fine):
 # Won't run if loaded as module
 if __name__=="__main__":
 	fine = np.loadtxt("soln_fine.dat")
-	reflux = np.loadtxt("soln_reflux.dat")
+	reflux = np.loadtxt("soln_reflux_const.dat")
 	no_reflux = np.loadtxt("soln_no_reflux.dat")
+	lin_interp = np.loadtxt("soln_lin_interp.dat")
+	quad_interp = np.loadtxt("soln_quad_interp.dat")
 
 	# interpolate the fine solution (linear) onto the coarse grid
 	# for comparison
@@ -30,14 +32,25 @@ if __name__=="__main__":
 	plt.plot(reflux[1:-1,0], reflux[1:-1,2], 'b--', lw=2, label='Locally refined [.3,.7]')
 	plt.plot(reflux[1:-1,0], no_reflux[1:-1,2], 'c-', lw=2, label='Locally refined, no reflux')
 
-	# get the different
-	diff = interp_fine - reflux[1:-1,:]
-	plt.plot(reflux[1:-1,0], diff[:,2], 'k-', lw=2, label="Diff between local refined and fine")
-	diff = reflux[1:-1,:] - no_reflux[1:-1,:]
-	plt.plot(reflux[1:-1,0], diff[:,2], 'r-', lw=2, label="Diff between reflux and no reflux")
-
 	# other plotting configs
 	plt.ylim([-0.1, 1.])
 	plt.legend(loc='best')
 	plt.title("1D diffusion equation comparison")
+	plt.show()
+
+
+	# get the different
+	plt.title("Difference compared to fine solution")
+	diff = interp_fine - no_reflux[1:-1,:]
+	plt.plot(reflux[1:-1,0], diff[:,2], 'r-', lw=2, label="Diff w no reflux")
+
+	diff = interp_fine - reflux[1:-1,:]
+	plt.plot(reflux[1:-1,0], diff[:,2], 'k-', lw=2, label="Diff w const interp")
+
+	diff = interp_fine - lin_interp[1:-1,:]
+	plt.plot(reflux[1:-1,0], diff[:,2], 'g-', lw=2, label="Diff w linear interpolation")
+
+	diff = interp_fine - quad_interp[1:-1,:]
+	plt.plot(reflux[1:-1,0], diff[:,2], 'c--', lw=2, label="Diff w quadratic interpolation")
+	plt.legend(loc='best')
 	plt.show()
