@@ -2,7 +2,7 @@ program solve
 	use field
 	implicit none
 	real				:: T, dt, last_dt, time=0.
-	real, allocatable	:: output(:,:)
+	real, allocatable	:: output(:,:), mass(:)
 	character(len=1024) :: filename, fmt_str
 	integer				:: i, j, s=0, nt, frames, incr, last_incr, co
 	! Set up the solution array and the problem parameters
@@ -43,9 +43,11 @@ program solve
 
 	! Store the initial snap shot
 	allocate(output(lo:hi, 0:frames-1))
+	allocate(mass(0:frames-1))
 	do i=lo, hi
 		output(i, 0) = soln(i, 0)
 	end do
+	call integrate_mass(0, mass(0))
 
 	! Initialize everything else in output to zero
 	do j=1, frames-1
@@ -88,15 +90,24 @@ program solve
 		if (j==frames-1) then
 			call step_forward(last_dt, time, s)
 		end if
+
 		do i=lo, hi
 			output(i, j) =  soln(i, s)
 		end do
+		call integrate_mass(s, mass(j))
+
 		write(7, '(f8.5 x)', advance="no") time
 		
 	end do
 	write(7,*)
 
 	! print out the results
+	write(7, '(a)', advance = "no") " #  mass "
+	do i=0, frames-1
+		write(7, '(f8.5 x)', advance="no") mass(i)
+	end do
+	write(7,*)
+
 	do i = lo, hi
 		write(7, '(f8.5 x)', advance="no") dx*(i+0.5)
 		do j = 0, frames-1
