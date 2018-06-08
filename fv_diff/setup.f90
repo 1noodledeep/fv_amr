@@ -4,10 +4,12 @@ subroutine setup
 ! allocate solution array
 !-------------------------------------------------
 	use field
+	use coarse_lp
+	use fine_lp
 	implicit none
 
 	! local variables
-	integer :: a_stat
+	integer :: a_stat, dum
 	! number of ghost cells on each side
 	integer, parameter :: ngc=1
 	write(*,'(A)',advance="NO") "The number of valid cells to use : "
@@ -46,6 +48,12 @@ subroutine setup
 	allocate(fine_soln(2*flo-ngc:2*fhi+1+ngc, 0:1), stat=a_stat)
 	if(a_stat/=0) stop "setup: allocation of fine soln failed. "
 
+	! NOW initialze the lapack modules
+	allocate(ca(n, n), cb(n, cnrhs), cipiv(n))
+	dum = 2*(fhi - flo + 1)
+	allocate(fa(dum, dum), fb(dum, fnrhs), fipiv(dum))
+
+
 end subroutine setup
 
 subroutine dealloc
@@ -53,6 +61,8 @@ subroutine dealloc
 ! Deallocate the dynamically allocated arrays
 !-------------------------------------------------
 	use field
+	use coarse_lp
+	use fine_lp
 	implicit none
 
 	integer :: da_stat
@@ -61,6 +71,7 @@ subroutine dealloc
 	deallocate(fine_soln, stat=da_stat)
 	if (da_stat /=0) stop "dealloc: deallocation failed. "
 
+	deallocate(fa, fb, fipiv, ca, cb, cipiv)
 end subroutine dealloc
 
 subroutine initialize

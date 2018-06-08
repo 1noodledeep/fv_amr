@@ -1,7 +1,6 @@
 subroutine step_forward (dt, time, s)
 !-------------------------------------------------
-! Carry out two steps forward, so the most
-! up to date soluiton is again in the old array
+! Carry out one step forward
 !-------------------------------------------------
 	use field
 	implicit none

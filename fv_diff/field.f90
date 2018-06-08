@@ -26,3 +26,29 @@ module field
 	! the refined solution array
 	real(dp), allocatable	:: fine_soln(:,:)
 end module field
+
+module coarse_lp
+!--------------------------------------------
+!  Module containing constants and arrays
+!  needed for DGESV call on coarse grid
+!--------------------------------------------
+	use field
+	implicit none
+	integer, parameter		:: cnrhs =1
+	real(dp), allocatable	:: ca(:,:), cb(:,:)
+	integer, allocatable	:: cipiv(:)
+	integer					:: cinfo
+end module coarse_lp
+
+module fine_lp
+!--------------------------------------------
+!  Module containing constants and arrays
+!  needed for DGESV call on coarse grid
+!--------------------------------------------
+	use field
+	implicit none
+	integer, parameter		:: fnrhs =1
+	real(dp), allocatable	:: fa(:,:), fb(:,:)
+	integer, allocatable	:: fipiv(:)
+	integer					:: finfo
+end module fine_lp

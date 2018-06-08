@@ -1,7 +1,6 @@
 subroutine step_forward (dt, time, s)
 !-------------------------------------------------
-! Carry out two steps forward, so the most
-! up to date soluiton is again in the old array
+! Carry 1 step forward
 !-------------------------------------------------
 	use field
 	implicit none
@@ -94,7 +93,6 @@ subroutine fine_step (s, left_out, right_in)
 				+fine_soln(2*flo,w) - fine_soln(2*flo-1,w)) 
 	right_in =-(fine_soln(2*fhi+2,s) - fine_soln(2*fhi+1, s) &
 				+fine_soln(2*fhi+2,w) - fine_soln(2*fhi+1,w)) 
-
 
 	! Now take second half step forward
 	do i = 2*flo, 2*fhi+1

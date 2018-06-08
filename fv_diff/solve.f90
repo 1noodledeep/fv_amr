@@ -5,13 +5,15 @@ program solve
 	real(dp), allocatable	:: output(:,:), mass(:)
 	character(len=1024) 	:: filename, fmt_str
 	integer					:: i, j, s=0, nt, frames,&
-							   incr, last_incr, co
+							   incr, last_incr, co, impl
 	! Set up the solution array and the problem parameters
 	call setup
 
 	! Initialize the solution
 	call initialize
 
+	write(*, '(a)', advance="no") "Implicit enter nonzero #: "
+	read(*,*) impl
 	write (*,'(a)', advance="no") "Minimal duration to solve to: "
 	read (*, *) T
 	write (*,'(a)', advance="no") "dt to use: "
@@ -49,7 +51,7 @@ program solve
 		output(i, 0) = soln(i, 0)
 	end do
 	call integrate_mass(0, mass(0))
-	!write(*,*) time, mass(0)
+	write(*,*) time, mass(0)
 
 	! Initialize everything else in output to zero
 	do j=1, frames-1
@@ -85,19 +87,29 @@ program solve
 			co = last_incr
 		end if
 
-		do i=1, co
-			call step_forward(dt, time, s)
-		end do
+		if(impl>0) then
+			do i=1,co
+				call impl_step_forward(dt, time, s)
+			end do
 
-		if (j==frames-1) then
-			call step_forward(last_dt, time, s)
+			if (j==frames-1) then
+				call impl_step_forward(last_dt, time, s)
+			end if
+		else
+			do i=1, co
+				call step_forward(dt, time, s)
+			end do
+
+			if (j==frames-1) then
+				call step_forward(last_dt, time, s)
+			end if
+
 		end if
-
 		do i=lo, hi
 			output(i, j) =  soln(i, s)
 		end do
 		call integrate_mass(s, mass(j))
-		!write(*,*) time, mass(j)
+		write(*,*) time, mass(j)
 
 		write(7, '(f8.5 x)', advance="no") time
 		
@@ -119,8 +131,9 @@ program solve
 		write(7,*)
 	end do
 	close(7)
+
 	! free the dynamically allocated memory
-	deallocate(output)
+	deallocate(output, mass)
 	call dealloc
 	stop
 end program solve
