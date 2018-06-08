@@ -34,7 +34,7 @@ subroutine setup
 
 	! Allocate the refined region solution
 	flo = pl + int(n*0.30)
-	fhi = pl + int(n*0.70)
+	fhi = pl + int(n*0.60)
 
 	if(fhi>pr) then
 		fhi = pr

@@ -224,13 +224,13 @@ subroutine integrate_mass(s, m)
 	use field
 	implicit none
 	integer, intent(in)				:: s
-	real(dp), intent(out)	:: m
+	real(dp), intent(out)			:: m
 	integer							:: i
-	real(dp)				:: mass
+	real(dp)						:: mass
 
 	mass = 0
-	call fill_ghost_cells(0)
-	call fill_ghost_cells(1)
+	!call fill_ghost_cells(0)
+	!call fill_ghost_cells(1)
 
 	do i = pl,pr
 		mass = mass+soln(i,s)

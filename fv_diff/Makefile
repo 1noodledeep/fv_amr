@@ -23,6 +23,6 @@ test: test.f90
 	 $(gf) $(cflags) $(iflags) -o $@ $^ $(lflags) $(lp_flags)
 
 clean:
-	rm -rf $(objs) $(execs) field.mod
+	rm -rf $(objs) $(execs) field.mod coarse_lp.mod fine_lp.mod
 
 .PHONY: clean executables

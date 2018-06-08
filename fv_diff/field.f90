@@ -14,13 +14,13 @@ module field
 	! the first and last non-ghost node index
 	integer				:: pl, pr
 	! physical coordinates of lower and higher bounds
-	real(dp)				:: rlo=0., rhi=1., dx, max_dt
-	real(dp), parameter		:: source = 1.
-	real(dp), parameter		:: src_bnry_left = 0.4, &
-									   src_bnry_right = 0.5
-	real(dp), parameter		:: cfl=0.2
+	real(dp)				:: rlo=0._dp, rhi=1._dp, dx, max_dt
+	real(dp), parameter		:: source = 1._dp
+	real(dp), parameter		:: src_bnry_left = 0.4_dp, &
+									   src_bnry_right = 0.5_dp
+	real(dp), parameter		:: cfl=0.2_dp
 	! Diffusion constant, rescale to be 1
-	real(dp), parameter		:: D=1.0
+	real(dp), parameter		:: D=1.0_dp
 	! the soln array
 	real(dp), allocatable	:: soln(:, :)
 	! the refined solution array

@@ -21,8 +21,12 @@ program solve
 	write(*, '(a)', advance="no") "Number of frames to write: "
 	read (*, *) frames
 
+	!T = 2*max_dt
+	!dt = max_dt
+	!frames = 2
 	! Compute the number of timesteps to take
 	if(dt> max_dt) dt = max_dt
+	if(T<dt) T=dt
 	nt = int(T/dt)
 	last_dt = (T-nt*dt)
 
@@ -51,7 +55,7 @@ program solve
 		output(i, 0) = soln(i, 0)
 	end do
 	call integrate_mass(0, mass(0))
-	write(*,*) time, mass(0)
+	write(*,*) "[time = ", time," m= ", mass(0),"]"
 
 	! Initialize everything else in output to zero
 	do j=1, frames-1
@@ -109,7 +113,7 @@ program solve
 			output(i, j) =  soln(i, s)
 		end do
 		call integrate_mass(s, mass(j))
-		write(*,*) time, mass(j)
+		write(*,*) "[time = ", time," m= ", mass(j),"]"
 
 		write(7, '(f8.5 x)', advance="no") time
 		
