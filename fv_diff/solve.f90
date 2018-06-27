@@ -2,7 +2,7 @@ program solve
 	use field
 	implicit none
 	real(dp)				:: T, dt, last_dt, time=0._dp
-	real(dp), allocatable	:: output(:,:), mass(:)
+	real(dp), allocatable	:: output(:,:)!, mass(:)
 	character(len=1024) 	:: filename, fmt_str
 	integer					:: i, j, s=0, nt, frames,&
 							   incr, last_incr, co, impl
@@ -14,21 +14,23 @@ program solve
 
 	write(*, '(a)', advance="no") "Implicit enter nonzero #: "
 	read(*,*) impl
-	write (*,'(a)', advance="no") "Minimal duration to solve to: "
-	read (*, *) T
-	write (*,'(a)', advance="no") "dt to use: "
-	read (*, *) dt
-	write(*, '(a)', advance="no") "Number of frames to write: "
-	read (*, *) frames
+	!write (*,'(a)', advance="no") "Minimal duration to solve to: "
+	!read (*, *) T
+	!write (*,'(a)', advance="no") "dt to use: "
+	!read (*, *) dt
+	!write(*, '(a)', advance="no") "Number of frames to write: "
+	!read (*, *) frames
 
-	!T = 2*max_dt
-	!dt = max_dt
-	!frames = 2
+	!impl=1
+	T = 0.2
+	dt = max_dt
+
 	! Compute the number of timesteps to take
 	if(dt> max_dt) dt = max_dt
 	if(T<dt) T=dt
 	nt = int(T/dt)
 	last_dt = (T-nt*dt)
+	frames = nt+1
 
 	! Write at least the beginning and the end frame
 	! At most 1 frame/timestep
@@ -50,12 +52,13 @@ program solve
 
 	! Store the initial snap shot
 	allocate(output(lo:hi, 0:frames-1))
-	allocate(mass(0:frames-1))
+	!allocate(mass(0:frames-1))
 	do i=lo, hi
 		output(i, 0) = soln(i, 0)
 	end do
-	call integrate_mass(0, mass(0))
-	write(*,*) "[time = ", time," m= ", mass(0),"]"
+
+	!call integrate_mass(0, mass(0))
+	!write(*,*) "[time = ", time," m= ", mass(0),"]"
 
 	! Initialize everything else in output to zero
 	do j=1, frames-1
@@ -112,8 +115,8 @@ program solve
 		do i=lo, hi
 			output(i, j) =  soln(i, s)
 		end do
-		call integrate_mass(s, mass(j))
-		write(*,*) "[time = ", time," m= ", mass(j),"]"
+		!call integrate_mass(s, mass(j))
+		!write(*,*) "[time = ", time," m= ", mass(j),"]"
 
 		write(7, '(f8.5 x)', advance="no") time
 		
@@ -121,11 +124,11 @@ program solve
 	write(7,*)
 
 	! print out the results
-	write(7, '(a)', advance = "no") " #  mass "
-	do i=0, frames-1
-		write(7, '(f8.5 x)', advance="no") mass(i)
-	end do
-	write(7,*)
+	!write(7, '(a)', advance = "no") " #  mass "
+	!do i=0, frames-1
+	!	write(7, '(f8.5 x)', advance="no") mass(i)
+	!end do
+	!write(7,*)
 
 	do i = lo, hi
 		write(7, '(f8.5 x)', advance="no") dx*(i+0.5)
@@ -137,7 +140,8 @@ program solve
 	close(7)
 
 	! free the dynamically allocated memory
-	deallocate(output, mass)
+	deallocate(output)
+	!deallocate(output, mass)
 	call dealloc
 	stop
 end program solve

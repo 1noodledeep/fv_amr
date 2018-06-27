@@ -12,9 +12,9 @@ subroutine setup
 	integer :: a_stat, dum
 	! number of ghost cells on each side
 	integer, parameter :: ngc=1
-	write(*,'(A)',advance="NO") "The number of valid cells to use : "
-	read(*, *) n
-	!n = 100
+	!write(*,'(A)',advance="NO") "The number of valid cells to use : "
+	!read(*, *) n
+	n = 100
 	! add ghost cells
 	n2 = n+2
 	! figure out the indexing scheme, going from -1 to n
@@ -34,7 +34,7 @@ subroutine setup
 
 	! Allocate the refined region solution
 	flo = pl + int(n*0.30)
-	fhi = pl + int(n*0.60)
+	fhi = pl + int(n*0.7 - 0.5)
 
 	if(fhi>pr) then
 		fhi = pr

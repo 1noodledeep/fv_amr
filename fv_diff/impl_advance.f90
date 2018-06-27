@@ -132,7 +132,7 @@ subroutine  fine_impl(s)
 	use fine_lp
 	implicit none
 	integer, intent(in)	:: s
-	real(dp), parameter	:: fine_cfl = 2._dp*cfl
+	real(dp), parameter	:: fine_cfl = 1._dp*cfl
 	integer				:: i, j, nf
 
 	nf = 2*(fhi-flo+1)

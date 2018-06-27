@@ -18,7 +18,7 @@ module field
 	real(dp), parameter		:: source = 1._dp
 	real(dp), parameter		:: src_bnry_left = 0.4_dp, &
 									   src_bnry_right = 0.5_dp
-	real(dp), parameter		:: cfl=0.2_dp
+	real(dp), parameter		:: cfl=40.0_dp
 	! Diffusion constant, rescale to be 1
 	real(dp), parameter		:: D=1.0_dp
 	! the soln array
